@@ -1,0 +1,35 @@
+{
+  "name": "harvest_data",
+  "version": "1.0.0",
+  "description": "data api forguerying needs in  harvest project",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "dependencies": {
+    "chai": "^3.5.0",
+    "seneca": "^2.0.1"
+  },
+  "devDependencies": {
+    "mocha": "^2.4.5"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/venkat299/harvest_data.git"
+  },
+  "keywords": [
+    "harvest",
+    "data",
+    "query"
+  ],
+  "author": "Venkatesh Duraiarasan",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/venkat299/harvest_data/issues"
+  },
+  "homepage": "https://github.com/venkat299/harvest_data#readme"
+}
