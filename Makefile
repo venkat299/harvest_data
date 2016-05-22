@@ -23,3 +23,9 @@ skel:
 	npm install chai --save-dev
 
 .PHONY: test tap unit jshint skel
+
+
+git_general_commit:
+	git add --all
+	git commit -m code_changed_to_accomodate_other_api_requirement
+	git push
