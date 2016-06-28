@@ -1,2 +1,5 @@
 node_modules
 examples
+.DS_Store
+test_db/
+download/

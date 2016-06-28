@@ -8,11 +8,24 @@
     "test": "test"
   },
   "dependencies": {
+    "bluebird": "^3.4.1",
     "chai": "^3.5.0",
-    "seneca": "^2.0.1"
+    "csv-parse": "^1.1.1",
+    "mimicry": "github:venkat299/mimicry",
+    "moment": "^2.13.0",
+    "request": "^2.72.0",
+    "seneca": "^2.0.1",
+    "seneca-entity": "^1.0.0",
+    "unzip": "^0.1.11"
   },
   "devDependencies": {
-    "mocha": "^2.4.5"
+    "mocha": "^2.4.5",
+    "coveralls": "^2.11.9",
+    "istanbul": "^0.4.3",
+    "mkdirp": "^0.5.1",
+    "mocha-lcov-reporter": "^1.2.0",
+    "seneca-jsonfile-store": "^0.2.2",
+    "seneca-level-store": "^0.2.3"
   },
   "scripts": {
     "test": "mocha"

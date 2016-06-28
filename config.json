@@ -1,0 +1,38 @@
+{
+	"test": {
+		"current_db":"json",
+		"mongo": {
+			"db_type": "mongo-store",
+			"db_config": {
+				"name": "harvest_test",
+				"host": "127.0.0.1",
+				"port": 27017
+			},
+			"db_uri": "mongodb://127.0.0.1:27017/harvest_test"
+
+		},
+		"level": {
+			"db_type": "level-store",
+			"db_config": {
+				"folder": "./test/test_db"
+			}
+		},
+		"json": {
+			"db_type": "jsonfile-store",
+			"db_config": {
+				"folder": "./test/test_db"
+			}
+		}
+	},
+	"data_provider":{
+		"current_dp_eod":"nse",
+		"quandl":{
+			"url": "https://www.quandl.com/api/v3/datasets/NSE/@tradingsymbol.@format?api_key=@api_key",
+			"api_key":"1CzVT1zp5yzCQjQNq8yR"
+		},
+		"nse":{
+			"url":"https://www.nseindia.com/content/historical/EQUITIES/@YYYY/@MMM/cm@DD@MMM@YYYYbhav.csv.zip",
+			"filename":"cm@DD@MMM@YYYYbhav.csv"
+		}
+	}
+}
