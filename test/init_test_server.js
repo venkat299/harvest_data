@@ -1,102 +1,111 @@
-var path = require('path')
-var fs = require('fs')
-var mkdirp = require('mkdirp')
-var config = require('../config.json')
-    // ======= change db here =========
-var test_db = config.test.current_db
-    // ================================
-var test_db_name = config.test[test_db].db_type
-var test_db_config = config.test[test_db].db_config
-    // ###### testing module ########
+const path = require('path');
+const fs = require('fs');
+const mkdirp = require('mkdirp');
+const Promise = require('bluebird');
+const logger = require('../app_logger').logger;
+// ###### testing module ########
+const seneca = require('seneca')();
 
+const config = require('../config.json');
+// ======= change db here =========
+const test_db = config.test.current_db;
+// ================================
+const test_db_name = config.test[test_db].db_type;
+const test_db_config = config.test[test_db].db_config;
+
+const custom_port = 8080;
+
+function rmDir(dirPath, removeSelf) {
+  /* eslint no-param-reassign:0 */
+  if (removeSelf === undefined) removeSelf = true;
+  let files;
+  try {
+    files = fs.readdirSync(dirPath);
+  } catch (e) {
+    // throw e
+    return;
+  }
+  if (files.length > 0) {
+    for (let i = 0; i < files.length; i++) {
+      const filePath = path.join(dirPath, files[i]);
+      if (fs.statSync(filePath).isFile()) fs.unlinkSync(filePath);
+      else rmDir(filePath);
+    }
+  }
+  if (removeSelf) fs.rmdirSync(dirPath);
+}
 function start(cb) {
-    var seneca = require('seneca')();
-    var Promise = require('bluebird')
-        //Promise.promisify(seneca.make$,{context:seneca})
-        //Promise.promisify(seneca.list$,{context:seneca})
-        // ###### service needed for testing  ########
-        //var harvest_strategy = require('harvest_strategy');
-        // var harvest_data = require('harvest_data');
-        // var harvest_evaluator = require('harvest_evaluator');
-        // var harvest_executor = require('harvest_executor');
-        // seneca.use(harvest_data)
-        // 	//seneca.use(harvest_strategy)
-        // seneca.use(harvest_evaluator)
-        // seneca.use(harvest_executor)
-        // ###### current service being tested ########
-    seneca.use('../index.js')
-    // ###### resetting db  ########
-    reset_db()
-    // ###### adding test db  ########
-    try {
-        seneca.use('entity')
-        seneca.use(test_db_name, test_db_config)
-    } catch (err) {
-        console.log(err)
-    }
-    // ###### promisifying method act  ########
-    Promise.promisify(seneca.act, {
-        context: seneca
-    })
-    // ###### returning a promise that db is configured  ########
-    return new Promise(function(resolve, reject) {
-        seneca.ready(function() {
-            // seneca.add('role:test_server,cmd:check_status', function(opt, cb) {
-            // 	cb(null, {
-            // 		success: true,
-            // 		server: 'alive',
-            // 		server_type: 'test'
-            // 	})
-            // })
-            try {
-                seneca.listen({
-                    host: 'localhost',
-                    port: '8080'
-                })
-                resolve(seneca)
-            } catch (e) {
-                reject(e)
-            }
-            //console.log('test server listening')
-        })
-    })
+   mkdirp.sync(test_db_config.folder);
+
+  // seneca.use(harvest_data);
+  // seneca.use(harvest_strategy)
+  // seneca.use(harvest_evaluator);
+  // seneca.use(harvest_executor);
+  // ###### current service being tested ########
+  seneca.use('../index.js');
+
+  // ###### adding test db  ########
+  try {
+    seneca.use('entity');
+    seneca.use(test_db_name, test_db_config);
+  } catch (err) {
+    logger.debug(err);
+  }
+
+  // ###### promisifying method act  ########
+  Promise.promisify(seneca.act, {
+    context: seneca,
+  });
+
+  // ###### returning a promise that db is configured  ########
+  // return new Promise(function (resolve, reject) {
+  seneca.ready(() => {
+    seneca.listen({
+      host: 'localhost',
+      port: custom_port,
+    });
+    cb();
+    // resolve({
+    //   seneca: seneca,
+    //   port: custom_port
+    // });
+    // logger.debug('test server listening')
+  });
+  // });
 }
-var reset_db = function() {
-    // ###### for mongo db  ########
-    if (test_db === 'mongo') {
-        // drop mongo db
-        //console.log('clearing mongodb database')
-    }
+function reset_db(cb) {
+  // ###### for mongo db  ########
+  if (test_db === 'mongo') {
+    // drop mongo db
+    // logger.debug('clearing mongodb database')
+  } else {
     // ###### for level db and json-file db  ########
-    else {
-        // ######### removing db directories #########
-        //console.log('clearing db files')
-        rmDir(test_db_config.folder, false)
-        rmDir('server/python_node_ipc/', false)
-        // ######### creating empty db directory #########
-        var mkdirp = require('mkdirp');
-        mkdirp(test_db_config.folder, function(err) {
-            // path exists unless there was an error
-            if (err) throw err
-                // work around for race issue while saving eod in eod.js
-            mkdirp(test_db_config.folder + '/eod')
-        });
-    }
+    // ######### removing db directories #########
+    // logger.debug('clearing db files')
+    rmDir(test_db_config.folder, false);
+    rmDir('server/python_node_ipc/', false);
+    // ######### creating empty db directory #########
+    mkdirp.sync(test_db_config.folder);
+
+    // path exists unless there was an error
+    logger.debug('>>>> deleted the db files');
+    cb({
+      seneca,
+      port: custom_port,
+    });
+  }
 }
-var rmDir = function(dirPath, removeSelf) {
-    if (removeSelf === undefined) removeSelf = true;
-    try {
-        var files = fs.readdirSync(dirPath);
-    } catch (e) {
-        //throw e
-        return;
-    }
-    if (files.length > 0)
-        for (var i = 0; i < files.length; i++) {
-            var filePath = path.join(dirPath, files[i]);
-            if (fs.statSync(filePath).isFile()) fs.unlinkSync(filePath);
-            else rmDir(filePath);
-        }
-    if (removeSelf) fs.rmdirSync(dirPath);
-};
-module.exports.start = start
+/* eslint no-undef:0 */
+before((done) => {
+  logger.debug('===== starting server =======');
+  start(done);
+});
+
+after((done) => {
+  logger.debug('====== closing server  =====');
+  seneca.close(done);
+  done();
+});
+
+// module.exports.start = start;
+module.exports.get_server = reset_db;
