@@ -1,6 +1,6 @@
 {
   "name": "harvest_data",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "data api forguerying needs in  harvest project",
   "main": "index.js",
   "directories": {
